@@ -19,3 +19,46 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 4s linear infinite;
+}
+
+
+.range {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+input[type="range"]::-moz-range-thumb {
+  -moz-appearance: none;
+  /* border: 2px solid; */
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+  max-width: 80px;
+  position: relative;
+  bottom: 11px;
+  background-color: #ffc202;
+  cursor: -moz-grab;
+  /* -moz-transition: border 1000ms ease; */
+  /* transition: border 1000ms ease; */
+}
+
+input[type="range"]::-moz-range-track {
+  -moz-appearance: none;
+  background: linear-gradient(90deg, #07e30f 0%, #fea602 100%);
+  border-radius: 20px;
+
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3bade3 ', endColorstr='#ff357f ', GradientType=1 );
+  height: 11px;
+}
