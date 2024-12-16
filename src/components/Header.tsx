@@ -1,6 +1,5 @@
 import { Ellipsis } from "lucide-react";
 import Image from "next/image";
-import ProgressBar from "./ProgressBar";
 
 const Header = () => {
   return (

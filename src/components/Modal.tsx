@@ -1,37 +1,73 @@
-"use client";
+import React, { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/utils/cn";
 
-import React, { useEffect } from "react";
+type MessageType = {
+  message: string;
+  type: "win" | "lose" | "neutral";
+};
 
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  points: number;
-  status: "won" | "lost" | "playing";
-}
+type gradientColorsType = {
+  [key: string]: string;
+};
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, points, status }) => {
-  if (!isOpen) return null;
+const useArcadeGameStatus = () => {
+  const [messages, setMessages] = useState<MessageType[]>([]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose();
-    }, 1000);
+  const addMessage = useCallback((newMessage: MessageType) => {
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  }, []);
 
-    return () => clearTimeout(timer);
-  }, [isOpen]);
+  const removeMessage = useCallback((index: number) => {
+    setMessages((prevMessages) => prevMessages.filter((_, i) => i !== index));
+  }, []);
+
+  return { messages, addMessage, removeMessage };
+};
+
+const ArcadeGameStatus = ({
+  messages,
+  removeMessage,
+}: {
+  messages: MessageType[];
+  removeMessage: (index: number) => void;
+}) => {
+  const gradientColors: gradientColorsType = {
+    win: "from-green-400 to-green-600",
+    lose: "from-red-400 to-red-600",
+    neutral: "from-blue-400 to-blue-600",
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className=" p-8 rounded-lg text-center shadow-lg animate-fade-in-out">
-        <h2 className="text-6xl font-bold mb-4 text-yellow-400 animate-pulse">
-          {status.toUpperCase()}
-        </h2>
-        <p className="text-4xl font-semibold mb-6 text-white animate-count-up">
-          Points: {points}
-        </p>
-      </div>
-    </div>
+    <AnimatePresence>
+      {messages.map((msg, index) => (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, scale: 0.5, y: "-50%", x: "-50%" }}
+          animate={{ opacity: 1, scale: 1.5, y: "-50%", x: "-50%" }}
+          exit={{
+            opacity: 0,
+            scale: 2,
+            y: "-50%",
+            x: "-50%",
+            transition: { duration: 0.5 },
+          }}
+          className={cn(`
+            fixed top-1/2 left-1/2 z-50 
+            bg-gradient-to-r ${gradientColors[msg.type]} 
+            text-white font-black text-2xl 
+            px-6 py-2 rounded-full 
+            shadow-2xl
+          `)}
+          onAnimationComplete={() => {
+            setTimeout(() => removeMessage(index), 2000);
+          }}
+        >
+          {msg.message}
+        </motion.div>
+      ))}
+    </AnimatePresence>
   );
 };
 
-export default Modal;
+export { ArcadeGameStatus, useArcadeGameStatus };

@@ -1,6 +1,5 @@
 "use client";
 
-import Modal from "@/components/Modal";
 import ProgressBar from "@/components/ProgressBar";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -20,7 +19,9 @@ const Mines = () => {
   const [score, setScore] = useState<number>(0);
   const [items, setItems] = useState<CellState[]>([]);
 
-  const [points, setPoints] = useState(0);
+  console.log("score", score);
+
+  const [points] = useState(0);
 
   const generateItems = () => {
     const mines = new Set<number>();

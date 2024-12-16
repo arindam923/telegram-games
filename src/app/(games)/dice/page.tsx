@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const Dice = () => {
   const [rollResult, setRollResult] = useState<number | null>(null);
-  const [multiplier, setMultiplier] = useState<number>(2.0);
+  const [multiplier] = useState<number>(2.0);
   const [rollOver, setRollOver] = useState<number>(50);
   const [winChance, setWinChance] = useState<number>(50);
   const [gameState, setGameState] = useState<"playing" | "won" | "lost">(
