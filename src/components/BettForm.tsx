@@ -27,27 +27,26 @@ const BettForm = () => {
         </div>
       </div>
       <BettingButton />
-      <div className="w-full p-2 flex items-center  rounded-[14px] mt-5 h-[57px] bg-gradient-to-br from-[#100f11] to-[#161613] border border-[#2e2e2d]">
-        <button
-          onClick={() => setIsManual(true)}
-          className={`w-[50%] rounded-[11px]  py-2  ${
-            isManual
-              ? "bg-gradient-to-br border border-[#1f1f1d] from-[#242422] to-[#161613]"
-              : ""
-          } flex items-center justify-center `}
-        >
-          Manual
-        </button>
-        <button
-          onClick={() => setIsManual(false)}
-          className={`w-[50%] rounded-[11px] py-2  ${
-            !isManual
-              ? "bg-gradient-to-br border border-[#1f1f1d] from-[#242422] to-[#161613]"
-              : ""
-          } flex items-center justify-center `}
-        >
-          Auto
-        </button>
+      <div className="w-full p-2 flex items-center rounded-[14px] mt-5 h-[57px] bg-gradient-to-br from-[#100f11] to-[#161613] border border-[#2e2e2d] relative overflow-hidden">
+        <div
+          className={`absolute top-0 left-0 w-1/2 h-full bg-gradient-to-br from-[#242422] to-[#161613] border border-[#1f1f1d] rounded-[11px] transition-all duration-300 ease-in-out ${
+            isManual ? "translate-x-0" : "translate-x-full"
+          }`}
+        ></div>
+        <div className="w-full flex justify-between px-2">
+          <button
+            onClick={() => setIsManual(true)}
+            className="w-[48%] py-2 z-10 transition-colors duration-300 ease-in-out"
+          >
+            Manual
+          </button>
+          <button
+            onClick={() => setIsManual(false)}
+            className="w-[48%] py-2 z-10 transition-colors duration-300 ease-in-out"
+          >
+            Auto
+          </button>
+        </div>
       </div>
     </div>
   );

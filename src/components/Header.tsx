@@ -33,7 +33,7 @@ const Header = () => {
           </div>
         </div>
       </div>
-      <ProgressBar percentage={80} />
+      {/* <ProgressBar percentage={80} /> */}
     </div>
   );
 };

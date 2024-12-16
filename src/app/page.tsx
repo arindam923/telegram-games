@@ -1,22 +1,25 @@
-import Image from "next/image";
-
 export default function Home() {
+  const games = [
+    { name: "Dice", icon: "🎲" },
+    { name: "Crash", icon: "💥" },
+    { name: "Roulette", icon: "🎡" },
+    { name: "Coinflip", icon: "🪙" },
+    { name: "Mines", icon: "💣" },
+  ];
+
   return (
-    <div className="min-h-screen w-full">
-      <div className="flex flex-col items-center">
-        <Image
-          src="/pick.svg"
-          width={60}
-          height={60}
-          className="object-contain"
-          alt=""
-        />
-        <div className="w-full spin h-[300px] relative">
-          <Image src="/wheel.svg" alt="wheel" fill />
-          <div className="absolute text-white  top-1/2 left-1/2 transform ">
-            <p>4.00x</p>
-          </div>
-        </div>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4 text-center">Choose a Game</h1>
+      <div className="grid grid-cols-2 gap-4">
+        {games.map((game) => (
+          <button
+            key={game.name}
+            className="flex flex-col items-center justify-center p-4 bg-gray-800 rounded-lg shadow-md hover:bg-gray-700 transition-colors"
+          >
+            <span className="text-4xl mb-2">{game.icon}</span>
+            <span className="text-sm">{game.name}</span>
+          </button>
+        ))}
       </div>
     </div>
   );

@@ -1,22 +1,7 @@
+import { cn } from "@/utils/cn";
+import { getNumberColor } from "@/utils/getNumberColor";
+import { calculatePayout } from "@/utils/roullete/calculatePayout";
 import React, { useState } from "react";
-
-// Utility to generate roulette number colors
-const getNumberColor = (number: number) => {
-  const redNumbers = [
-    1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
-  ];
-  const blackNumbers = [
-    2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35,
-  ];
-
-  if (number === 0)
-    return "bg-gradient-to-b from-[rgba(7,227,15,0.05)] border-t border-l border-[#07E30F] to-[rgba(47,91,41,0.44)] rounded-[11px] text-white";
-  if (redNumbers.includes(number))
-    return "bg-gradient-to-b from-[rgba(227,7,7,0.05)] border-t border-l border-[#E30707] to-[rgba(91,43,41,0.44)] rounded-[11px] text-white";
-  if (blackNumbers.includes(number))
-    return "bg-gradient-to-b from-[#242422] via-[#242422] to-[#161613] border-t border-l border-[#666] rounded-[11px] text-white";
-  return "bg-gray-400 rounded-[11px] text-white";
-};
 
 // Bet type constants
 const OUTSIDE_BETS = {
@@ -27,30 +12,52 @@ const OUTSIDE_BETS = {
 };
 
 // Define the type for bets
-interface Bets {
+export interface Bets {
   [key: string]: number;
 }
 
-const RouletteBettingBoard = () => {
+type Props = {
+  balance: number;
+  onSpin: (bets: Bets) => void;
+  spinResult: number | null;
+};
+
+const RouletteBettingBoard: React.FC<Props> = ({
+  balance,
+  onSpin,
+  spinResult,
+}) => {
   // Update the state with proper typing
   const [bets, setBets] = useState<Bets>({});
 
-  // Handle bet placement
   const placeBet = (
     betType: string,
     betValue: string | number,
     amount: number = 10
   ) => {
-    setBets((prev) => ({
-      ...prev,
-      [`${betType}-${betValue}`]:
-        (prev[`${betType}-${betValue}`] || 0) + amount,
-    }));
-    console.log("Current Bets:", bets);
+    const totalBet = Object.values(bets).reduce((sum, bet) => sum + bet, 0);
+    if (balance - totalBet - amount >= 0) {
+      setBets((prev) => ({
+        ...prev,
+        [`${betType}-${betValue}`]:
+          (prev[`${betType}-${betValue}`] || 0) + amount,
+      }));
+    } else {
+      alert("Insufficient balance to place this bet.");
+    }
   };
 
   // Clear all bets
   const clearBets = () => {
+    setBets({});
+  };
+
+  const handleSpin = () => {
+    if (Object.keys(bets).length === 0) {
+      alert("Place at least one bet before spinning!");
+      return;
+    }
+    onSpin(bets);
     setBets({});
   };
 
@@ -68,14 +75,17 @@ const RouletteBettingBoard = () => {
           row.map((number) => (
             <div
               key={number}
-              className={`
-                ${getNumberColor(number)}
+              className={cn(
+                `
                 text-center 
                 size-[60px] 
                 flex 
                 items-center 
                 justify-center
-              `}
+                cursor-pointer
+              `,
+                getNumberColor(number)
+              )}
               onClick={() => placeBet("number", number)}
             >
               {number}
@@ -148,35 +158,20 @@ const RouletteBettingBoard = () => {
   };
 
   return (
-    <div className="p-4  rounded-lg shadow-lg max-w-xl mx-auto">
-      {/* Numbers Grid */}
-      {renderNumbersGrid()}
-
-      {/* Outside Bets */}
-      {renderOutsideBets()}
-
-      {/* Bet Summary and Clear Button */}
-      {/* <div className="mt-4">
-        <h3 className="text-lg font-bold mb-2">Current Bets</h3>
-        <div className=" p-2 rounded border min-h-[100px]">
-          {Object.entries(bets).length > 0 ? (
-            Object.entries(bets).map(([betKey, amount]) => (
-              <div key={betKey} className="flex justify-between">
-                <span>{betKey}</span>
-                <span className="font-bold">${amount}</span>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-center">No bets placed</p>
-          )}
+    <div className="p-4 rounded-lg shadow-lg max-w-xl mx-auto">
+      {spinResult !== null && (
+        <div className="text-center text-2xl font-bold mb-4">
+          Spin Result: {spinResult}
         </div>
-        <button
-          className="mt-2 w-full bg-red-500 text-white py-2 rounded hover:bg-red-600"
-          onClick={clearBets}
-        >
-          Clear All Bets
-        </button>
-      </div> */}
+      )}
+      {renderNumbersGrid()}
+      {renderOutsideBets()}
+      <button
+        className="mt-4 bg-green-500 text-white rounded-full px-6 py-2"
+        onClick={handleSpin}
+      >
+        Spin
+      </button>
     </div>
   );
 };

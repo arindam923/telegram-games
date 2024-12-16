@@ -1,6 +1,6 @@
 const ProgressBar = ({ percentage }: { percentage: number }) => {
   return (
-    <div className="w-full mt-4 h-2 bg-[#403e3e]">
+    <div className="w-full my-4 h-2 bg-[#403e3e]">
       <div
         className="h-full "
         style={{

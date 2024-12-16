@@ -1,9 +1,3 @@
-"use client";
-
-import BettForm from "@/components/BettForm";
-import RoulleteBettingBoard from "@/components/Roullete/RoullteBettingBoard";
-import { useState } from "react";
-
 const RouletteWheel: React.FC<{ isSpining: boolean }> = ({ isSpining }) => {
   return (
     <div className="bg-gradient-to-br mx-auto w-[95%] mt-5 rounded-[21px] from-[#242422] to-[#161613]">
@@ -16,36 +10,17 @@ const RouletteWheel: React.FC<{ isSpining: boolean }> = ({ isSpining }) => {
         </div>
         <img
           src={"/Ellipse.png"}
-          className={`size-[300px] absolute ${
-            isSpining && "animate-spin-slow"
-          }`}
+          className={`size-[300px] absolute ${isSpining && "spin"}`}
           alt=""
         />
         <img
           src={"/Plus.png"}
           alt=""
-          className={`size-[100px]  absolute ${isSpining && "animate-spin"}`}
-        />
-        <img
-          src={"./Ellipse-2.png"}
-          alt=""
-          className="absolute z-10 size-[252px]"
+          className={`size-[100px]  absolute ${isSpining && "spin"}`}
         />
       </div>
-      <RoulleteBettingBoard />
     </div>
   );
 };
 
-const Roullete = () => {
-  const [isSpining, setIsSpining] = useState(true);
-
-  return (
-    <div className="flex flex-col  bg-black text-white">
-      <RouletteWheel isSpining={isSpining} />
-      <BettForm />
-    </div>
-  );
-};
-
-export default Roullete;
+export default RouletteWheel;
