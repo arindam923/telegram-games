@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, use, useState } from "react";
 import dynamic from "next/dynamic";
 
 const WheelOfPrizes = dynamic(() => import("@/components/Wheel/Wheel"), {
@@ -8,6 +8,8 @@ const WheelOfPrizes = dynamic(() => import("@/components/Wheel/Wheel"), {
 });
 
 const Wheel = () => {
+  const [text, setText] = useState("Start Game");
+
   return (
     <div className="min-h-screen w-full">
       <div
@@ -23,7 +25,7 @@ const Wheel = () => {
           </Suspense>
 
           <div className="absolute z-10 inset-0  top-0 flex items-center justify-center">
-            <p className="text-white text-3xl font-bold">4.00x</p>
+            <p className="text-white text-3xl font-bold">{text}</p>
           </div>
         </div>
       </div>

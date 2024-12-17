@@ -4,7 +4,10 @@ import { Suspense, useState } from "react";
 import dynamic from "next/dynamic";
 import { calculatePayout } from "@/utils/roullete/calculatePayout";
 import { Bets } from "@/components/Roullete/RoullteBettingBoard";
-import { ArcadeGameStatus, useArcadeGameStatus } from "@/components/Modal";
+import {
+  ArcadeGameStatus,
+  useArcadeGameStatus,
+} from "@/components/common/Modal";
 
 const RouletteBettingBoard = dynamic(
   () => import("@/components/Roullete/RoullteBettingBoard"),
@@ -13,7 +16,7 @@ const RouletteBettingBoard = dynamic(
   }
 );
 
-const CustomRoulette = dynamic(() => import("@/components/Wheel"), {
+const CustomRoulette = dynamic(() => import("@/components/Roullete/Wheel"), {
   ssr: false,
 });
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import BettForm from "@/components/BettForm";
+import React, { useState } from "react";
 import Image from "next/image";
 
 const CoinFlip = () => {
@@ -10,11 +9,15 @@ const CoinFlip = () => {
   >(null);
   const [gameResult, setGameResult] = useState<"heads" | "tails" | null>(null);
   const [gameState, setGameState] = useState<"waiting" | "playing" | "result">(
-    "waiting"
+    "waiting",
   );
+  const [bet, setBet] = useState<number>(1); // Store bet amount
+  const [resultMessage, setResultMessage] = useState<string | null>(null); // Win/Loss animation message
+  const [isManual, setIsManual] = useState(false);
 
+  // Handle game mode selection
   const handleModeSelect = (mode: "random" | "heads" | "tails") => {
-    if (gameState !== "waiting") return;
+    if (gameState !== "waiting" || bet <= 0) return; // Prevent playing without bet
 
     setSelectedMode(mode);
     setGameState("playing");
@@ -24,114 +27,165 @@ const CoinFlip = () => {
       const result = Math.random() > 0.5 ? "heads" : "tails";
       setGameResult(result);
       setGameState("result");
-    }, 2000); // 2 seconds to simulate coin flip
-  };
 
-  const resetGame = () => {
-    setSelectedMode(null);
-    setGameResult(null);
-    setGameState("waiting");
+      // Check if user won
+      const didWin = mode === result || mode === "random";
+      setResultMessage(
+        didWin
+          ? `🎉 You WON! Coin landed on ${result.toUpperCase()}!`
+          : `💥 You LOST! Coin landed on ${result.toUpperCase()}!`,
+      );
+
+      // Clear the result message after 3 seconds
+      setTimeout(() => {
+        setResultMessage(null);
+        setGameState("waiting");
+        setGameResult(null);
+        setSelectedMode(null);
+      }, 3000);
+    }, 2000); // Simulate 2-second delay
   };
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full flex flex-col ">
       {/* Status Bar */}
-      <div className="w-full  p-4 rounded-xl mb-6 text-center shadow-md">
-        {gameState === "waiting" && (
-          <p className="text-lg font-bold text-white">
-            Select a game mode to start!
-          </p>
-        )}
+      <div className="w-full p-4 rounded-xl text-center shadow-md">
         {gameState === "playing" && (
           <p className="text-lg font-bold text-yellow-400">
             Flipping the coin...
           </p>
         )}
-        {gameState === "result" && gameResult && (
-          <p
-            className={`text-lg font-bold ${
-              selectedMode === gameResult || selectedMode === "random"
-                ? "text-green-400"
-                : "text-red-400"
-            }`}
-          >
-            {selectedMode === gameResult || selectedMode === "random"
-              ? `🎉 You won! The coin landed on ${gameResult.toUpperCase()}!`
-              : `💥 You lost! The coin landed on ${gameResult.toUpperCase()}.`}
-          </p>
-        )}
       </div>
 
       {/* Game Mode Selection */}
-      <div className="flex items-center justify-center space-x-8 mb-10">
-        {/* Random Mode */}
-        <div
-          className={`transition-all duration-300 ease-in-out ${
-            selectedMode === "random" ? "scale-110" : "scale-100"
-          } cursor-pointer`}
-          onClick={() => handleModeSelect("random")}
-        >
-          <Image
-            src="/Random-coin.svg"
-            width={selectedMode === "random" ? 100 : 60}
-            height={selectedMode === "random" ? 100 : 60}
-            alt="Random Mode"
-          />
-          <p className="text-center mt-2 text-white text-sm font-semibold">
-            Random
-          </p>
-        </div>
-
-        {/* Heads Mode */}
-        <div
-          className={`transition-all duration-300 ease-in-out ${
-            selectedMode === "heads" ? "scale-110" : "scale-100"
-          } cursor-pointer`}
-          onClick={() => handleModeSelect("heads")}
-        >
-          <Image
-            src="/Heads-coin.svg"
-            width={selectedMode === "heads" ? 100 : 60}
-            height={selectedMode === "heads" ? 100 : 60}
-            alt="Guess Heads"
-          />
-          <p className="text-center mt-2 text-white text-sm font-semibold">
-            Heads
-          </p>
-        </div>
-
-        {/* Tails Mode */}
-        <div
-          className={`transition-all duration-300 ease-in-out ${
-            selectedMode === "tails" ? "scale-110" : "scale-100"
-          } cursor-pointer`}
-          onClick={() => handleModeSelect("tails")}
-        >
-          <Image
-            src="/Tails-coin.svg"
-            width={selectedMode === "tails" ? 100 : 60}
-            height={selectedMode === "tails" ? 100 : 60}
-            alt="Guess Tails"
-          />
-          <p className="text-center mt-2 text-white text-sm font-semibold">
-            Tails
-          </p>
-        </div>
-      </div>
-      {/* Reset Button */}
-      {gameState === "result" && (
-        <div className="mt-6 flex justify-center">
-          <button
-            onClick={resetGame}
-            className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+      {!selectedMode && (
+        <div className="flex w-[90%] mx-auto h-[250px] rounded-[16px] border-2 border-[#1f1f1d] bg-gradient-to-l from-[#242422]/40 to-[#161613]/90 items-center justify-center space-x-8 mb-10">
+          {/* Random Mode */}
+          <div
+            className={`cursor-pointer transition-transform duration-300 ease-in-out hover:scale-110`}
+            onClick={() => handleModeSelect("random")}
           >
-            Play Again
-          </button>
+            <Image
+              src="/Random-coin.svg"
+              width={100}
+              height={100}
+              alt="Random Mode"
+              // className="filter grayscale"
+            />
+            <p className="text-center mt-2 text-white text-sm font-semibold">
+              Random
+            </p>
+          </div>
+
+          {/* Heads Mode */}
+          <div
+            className={`cursor-pointer transition-transform duration-300 ease-in-out hover:scale-110`}
+            onClick={() => handleModeSelect("heads")}
+          >
+            <Image
+              src="/Heads-coin.svg"
+              width={100}
+              height={100}
+              alt="Guess Heads"
+              // className="filter grayscale"
+            />
+            <p className="text-center mt-2 text-white text-sm font-semibold">
+              Heads
+            </p>
+          </div>
+
+          {/* Tails Mode */}
+          <div
+            className={`cursor-pointer transition-transform duration-300 ease-in-out hover:scale-110`}
+            onClick={() => handleModeSelect("tails")}
+          >
+            <Image
+              src="/Tails-coin.svg"
+              width={100}
+              height={100}
+              alt="Guess Tails"
+              // className="filter grayscale"
+            />
+            <p className="text-center mt-2 text-white text-sm font-semibold">
+              Tails
+            </p>
+          </div>
         </div>
       )}
 
-      {/* Betting Form */}
-      <BettForm />
+      {/* Bet Amount Input */}
+      <div className="w-[90%] mx-auto mt-5 rounded-xl font-sans bg-[#242422] px-2 py-3">
+        <div className="flex items-center justify-between text-[14px] font-medium text-white mb-2">
+          <h3>Bet Amount</h3>
+          <p>$0.0</p>
+        </div>
+        <div>
+          <div className="flex overflow-hidden items-center gap-2">
+            <input
+              type="number"
+              value={bet}
+              min="1"
+              onChange={(e) => setBet(parseFloat(e.target.value))}
+              className="flex-1 px-3 py-2 rounded-lg text-white bg-[#100F11] border border-[#2E2E2D] focus:outline-none"
+              placeholder="Enter bet"
+              disabled={gameState !== "waiting"}
+            />
+            <button
+              onClick={() => setBet(bet / 2)}
+              disabled={bet <= 1 || gameState !== "waiting"}
+              className="w-20 h-10 rounded-lg bg-[#100F11] border border-[#2E2E2D] text-white"
+            >
+              1/2x
+            </button>
+            <button
+              onClick={() => setBet(bet * 2)}
+              disabled={gameState !== "waiting"}
+              className="w-20 h-10 rounded-lg bg-[#100F11] border border-[#2E2E2D] text-white"
+            >
+              2x
+            </button>
+          </div>
+          <button
+            className={`btn-shadow w-full mt-4 py-2 text-white rounded-lg transition-all ${
+              bet > 0 && gameState === "playing"
+                ? "bg-green-500 hover:bg-green-400"
+                : "bg-gray-700 cursor-not-allowed"
+            }`}
+            // onClick={}
+            // disabled={bet <= 0}
+          >
+            BET
+          </button>
+        </div>
+        <div className="w-full p-2 flex items-center rounded-[14px] mt-5 h-[57px] bg-gradient-to-br from-[#100f11] to-[#161613] border border-[#2e2e2d] relative overflow-hidden">
+          <div
+            className={`absolute top-0 left-0 w-1/2 h-full bg-gradient-to-br from-[#242422] to-[#161613] border border-[#1f1f1d] rounded-[11px] transition-all duration-300 ease-in-out ${
+              isManual ? "translate-x-0" : "translate-x-full"
+            }`}
+          ></div>
+          <div className="w-full flex justify-between px-2">
+            <button
+              onClick={() => setIsManual(true)}
+              className="w-[48%] py-2 z-10 text-white transition-colors duration-300 ease-in-out"
+            >
+              Manual
+            </button>
+            <button
+              onClick={() => setIsManual(false)}
+              className="w-[48%] py-2 z-10 text-white transition-colors duration-300 ease-in-out"
+            >
+              Auto
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Result Message */}
+      {resultMessage && (
+        <div className="absolute w-[90%] h-[300px] top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-700 ease-in-out opacity-100 text-center text-3xl font-bold text-white bg-black bg-opacity-70 px-6 py-4 rounded-lg animate-fade-out">
+          {resultMessage}
+        </div>
+      )}
     </div>
   );
 };

@@ -64,6 +64,7 @@ const wheelData: PrizeData[] = randomizedWheelColors.map((color) => ({
 const WheelOfPrizes: React.FC = () => {
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
+  const [text, setText] = useState<string | null>(null);
 
   const handleSpinClick = () => {
     const newPrizeNumber = Math.floor(Math.random() * wheelData.length);
@@ -94,12 +95,8 @@ const WheelOfPrizes: React.FC = () => {
           onStopSpinning={() => setMustSpin(false)}
         />
 
-        {/* <div className="absolute z-10 top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="text-yellow-500 relative bottom-10text-4xl">💛</div>
-        </div> */}
-
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-4xl font-bold text-white">4.00x</div>
+        <div className="absolute inset-0 z-20 flex items-center justify-center">
+          <div className="text-4xl font-bold text-white">{text}</div>
         </div>
       </div>
 
