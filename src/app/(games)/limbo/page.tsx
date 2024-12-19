@@ -1,28 +1,49 @@
 "use client";
 
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import BettForm from "@/components/common/BettForm";
+import React, { useState } from "react";
+import { toast } from "sonner";
 
 const Limbo = () => {
   const [multiplier, setMultiplier] = useState<number | null>(null);
-  const [betAmount, setBetAmount] = useState<number>(0);
+  const [bet, setBet] = useState<number>(0);
   const [gameState, setGameState] = useState<"waiting" | "rolling" | "result">(
     "waiting"
   );
   const [gameResult, setGameResult] = useState<number | null>(null);
   const [win, setWin] = useState<boolean | null>(null);
+  const [isManual, setIsManual] = useState<boolean>(false);
 
-  function validateBetAmount(amount: number) {
-    const minBet = 1;
-    const maxBet = 10000; // Example limit
-    if (amount < minBet || amount > maxBet) {
-      alert(`Bet amount must be between ${minBet} and ${maxBet}`);
+  const MIN_BET = 1;
+  const MAX_BET = 10000;
+  const MIN_MULTIPLIER = 1.01;
+  const MAX_MULTIPLIER = 100;
+
+  const validateBetAmount = (amount: number): boolean => {
+    if (amount < MIN_BET || amount > MAX_BET) {
+      alert(`Bet amount must be between ${MIN_BET} and ${MAX_BET}`);
       return false;
     }
     return true;
-  }
+  };
+
+  // const validateMultiplier = (value: number): number => {
+  //   if (value < MIN_MULTIPLIER) return MIN_MULTIPLIER;
+  //   if (value > MAX_MULTIPLIER) return MAX_MULTIPLIER;
+  //   return value;
+  // };
 
   const startGame = () => {
-    if (!validateBetAmount(betAmount)) {
+    if (!multiplier) {
+      alert("Set a multiplier before playing.");
+      toast("select a multiplier");
+      return;
+    }
+    if (!validateBetAmount(bet)) {
+      toast("invalid bet amount");
       return;
     }
 
@@ -30,19 +51,12 @@ const Limbo = () => {
     setGameResult(null);
     setWin(null);
 
-    // Simulate game roll (ensure randomness and fairness)
     setTimeout(() => {
       const result = Math.random() * 100; // Random number between 0 and 100
       setGameResult(result);
-
-      if (multiplier && result < multiplier) {
-        setWin(true);
-      } else {
-        setWin(false);
-      }
-
+      setWin(result < multiplier);
       setGameState("result");
-    }, 2000); // Simulate 2-second game roll
+    }, 2000);
   };
 
   const resetGame = () => {
@@ -50,12 +64,13 @@ const Limbo = () => {
     setMultiplier(null);
     setGameResult(null);
     setWin(null);
+    setBet(0);
   };
 
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Status Bar */}
-      <div className="w-full  p-4 rounded-xl mb-6 text-center shadow-md">
+      <div className="w-full p-4 rounded-xl mb-6 text-center shadow-md">
         {gameState === "waiting" && (
           <p className="text-lg font-bold text-white">
             Place your bet and set your multiplier!
@@ -71,53 +86,41 @@ const Limbo = () => {
             }`}
           >
             {win
-              ? `🎉 You won! Multiplier hit: ${gameResult?.toFixed(2)}x`
-              : `💥 You lost! Multiplier hit: ${gameResult?.toFixed(2)}x`}
+              ? `🎉 You won! Multiplier hit: ${gameResult?.toFixed(2)}`
+              : `💥 You lost! Multiplier hit: ${gameResult?.toFixed(2)}`}
           </p>
         )}
       </div>
 
       {/* Game Box */}
       <div
+        className="w-[90%] h-[300px] mx-auto pb-4 rounded-[21px] mt-5 border border-[#1f1f1d] flex flex-col justify-center items-center relative"
         style={{
           background:
             "linear-gradient(182.23deg, rgba(36, 36, 34, 0.2) 38.66%, rgba(22, 22, 19, 0.2) 98.13%)",
         }}
-        className="w-[90%] h-[300px] mx-auto pb-4 rounded-[21px] mt-5 border border-[#1f1f1d] flex flex-col justify-center items-center relative"
       >
         {/* Multiplier Display */}
         <div className="flex-1 flex items-center justify-center">
           <h3 className="text-5xl font-black">
-            {gameResult ? gameResult.toFixed(2) : "4.00x"}
+            {gameResult !== null ? `${gameResult.toFixed(2)}X ` : "0.00x"}
           </h3>
         </div>
 
         {/* Stats */}
-        <div className="w-[95%] text-[14px] font-medium rounded-[14px] border border-[#1f1f1d] p-2 mx-auto items-center grid grid-cols-3 gap-2 h-[120px] bg-gradient-to-br from-[#242422] to-[#161613]">
+        <div className="w-[95%] text-[14px] font-medium rounded-[14px] border border-[#1f1f1d] p-2 mx-auto items-center grid grid-cols-2 gap-2 h-[120px] bg-gradient-to-br from-[#242422] to-[#161613]">
           <div className="space-y-1">
             <p>Multiplier</p>
             <div className="w-full rounded-[11px] flex items-center justify-center h-[50px] bg-gradient-to-br from-[#100f11] to-[#161613] border border-[#2e2e2d]">
               <input
                 type="text"
                 inputMode="decimal"
-                pattern="[0-9]*[.,]?[0-9]*"
-                placeholder="e.g. 2.00"
+                min={MIN_MULTIPLIER}
+                max={MAX_MULTIPLIER}
                 value={multiplier || ""}
-                onChange={(e) => setMultiplier(parseFloat(e.target.value))}
-                className="bg-transparent text-center text-white outline-none w-full"
-              />
-            </div>
-          </div>
-          <div className="space-y-1">
-            <p>Bet Amount</p>
-            <div className="w-full rounded-[11px] flex items-center justify-center h-[50px] bg-gradient-to-br from-[#100f11] to-[#161613] border border-[#2e2e2d]">
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder="e.g. 50"
-                value={betAmount || ""}
-                onChange={(e) => setBetAmount(parseFloat(e.target.value))}
+                onChange={(e) => {
+                  setMultiplier(parseFloat(e.target.value));
+                }}
                 className="bg-transparent text-center text-white outline-none w-full"
               />
             </div>
@@ -125,30 +128,19 @@ const Limbo = () => {
           <div className="space-y-1">
             <p>Win Chance</p>
             <div className="w-full rounded-[11px] flex items-center justify-center h-[50px] bg-gradient-to-br from-[#100f11] to-[#161613] border border-[#2e2e2d]">
-              <p>{multiplier ? (100 / multiplier).toFixed(2) : "N/A"}%</p>
+              <p>{multiplier ? (100 / multiplier).toFixed(2) : "0.0"}%</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Buttons */}
-      <div className="flex justify-center mt-6 space-x-4">
-        <button
-          onClick={gameState === "rolling" ? resetGame : startGame}
-          className={`px-6 w-[90%] mx-auto py-3 rounded-lg text-white font-bold 
-            bg-gradient-to-r from-yellow-400 to-orange-500 
-            border-2 border-orange-500 
-            shadow-[0_0_15px_rgba(255,165,0,0.5)]
-            ${
-              gameState === "rolling"
-                ? "opacity-75 cursor-not-allowed"
-                : "hover:from-yellow-300 hover:to-orange-400"
-            }`}
-          disabled={gameState === "rolling"}
-        >
-          {gameState === "rolling" ? "Reset" : "Start Game"}
-        </button>
-      </div>
+      <BettForm
+        bet={bet}
+        setBet={setBet}
+        onClick={startGame}
+        isManual={isManual}
+        setIsManual={setIsManual}
+      />
     </div>
   );
 };

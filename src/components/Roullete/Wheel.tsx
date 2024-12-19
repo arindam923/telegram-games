@@ -20,7 +20,7 @@ const wheelData = numbers.map((number, index) => ({
 
 const CustomRoulette: React.FC<{ isSpining: boolean }> = ({ isSpining }) => {
   return (
-    <div className="relative flex items-center mx-auto mt-5 justify-center h-[300px] w-[300px]">
+    <div className="relative flex items-center mx-auto mt-5 justify-center h-[300px] w-[90%]">
       <Wheel
         mustStartSpinning={isSpining}
         prizeNumber={0}

@@ -1,135 +1,124 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import BettingButton from "@/components/common/BettButton";
-import BettForm from "@/components/crash/BettForm";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-const CrashGame: React.FC = () => {
-  const [isRunning, setIsRunning] = useState(false);
-  const [multiplier, setMultiplier] = useState(1.0);
-  const [isCrashed, setIsCrashed] = useState(false);
-  const [betPlaced, setBetPlaced] = useState(false);
+import { useState } from "react";
+
+import BettForm from "@/components/crash/BettForm";
+import AnimatedAreaGraph from "@/components/crash/Graph";
+import { toast } from "sonner";
+import { generateData } from "@/utils/crash/generateData";
+
+const Crash = () => {
+  const [bet, setBet] = useState(0);
+  const [triggerAnimation, setTriggerAnimation] = useState(false);
+
+  const [gameState, setGameState] = useState<"betting" | "playing" | "crashed">(
+    "betting"
+  );
+
+  const [isManual, setIsManual] = useState(false);
+  const [currentMultiplier, setCurrentMultiplier] = useState<number>(1.0);
   const [cashOutMultiplier, setCashOutMultiplier] = useState<number | null>(
     null
   );
 
-  const multiplierRef = useRef(multiplier);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
-
-    if (isRunning && !isCrashed) {
-      interval = setInterval(() => {
-        setMultiplier((prev) => {
-          const newMultiplier = parseFloat((prev + 0.02).toFixed(2));
-          multiplierRef.current = newMultiplier;
-
-          // Simulate crash (randomly for demonstration)
-          if (Math.random() < 0.005 || newMultiplier >= 10) {
-            setIsCrashed(true);
-            clearInterval(interval);
-          }
-
-          return newMultiplier;
-        });
-      }, 100);
-    } else {
-      clearInterval(interval);
+  const onGameCrash = () => {
+    if (gameState === "playing") {
+      setGameState("crashed");
+      toast("The game has crashed!", {
+        style: {
+          background: "red",
+          color: "#fff",
+          borderColor: "red",
+        },
+      });
+      setTimeout(() => setGameState("betting"), 2000); // Automatically reset to betting after a short delay
     }
-
-    return () => clearInterval(interval);
-  }, [isRunning, isCrashed]);
-
-  const handleBet = () => {
-    setBetPlaced(true);
-    setIsRunning(true);
-    setMultiplier(1.0);
-    setIsCrashed(false);
-    setCashOutMultiplier(null);
   };
 
   const handleCashOut = () => {
-    setIsRunning(false);
-    setCashOutMultiplier(multiplierRef.current);
-    setBetPlaced(false);
+    if (gameState === "playing" && currentMultiplier > 1.0) {
+      setCashOutMultiplier(currentMultiplier); // Record the multiplier at cash-out
+      setGameState("betting"); // End the game and reset to betting phase
+      setTriggerAnimation(false); // Stop the animation
+      toast(`You cashed out at ${currentMultiplier.toFixed(2)}x!`, {
+        style: {
+          background: "green",
+          color: "#fff",
+          borderColor: "green",
+        },
+      });
+    }
+  };
+
+  const startGame = () => {
+    if (bet <= 0) {
+      toast("Invalid bet amount", {
+        style: {
+          background: "red",
+          color: "#fff",
+          borderColor: "red",
+        },
+      });
+      return;
+    }
+
+    // Reset everything
+    setTriggerAnimation(false); // Stop previous animation
+    setCashOutMultiplier(null); // Clear cash-out
+    setGameState("playing"); // Set state to playing
+
+    // Trigger new animation after a short delay
+    setTimeout(() => setTriggerAnimation(true), 100);
+  };
+
+  const handleMultiplierChange = (multiplier: number, isFinal: boolean) => {
+    if (isFinal) {
+      setGameState("crashed");
+    }
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-black">
-      {/* Game Area with Background */}
-      <div
-        className="w-full max-w-3xl h-[400px] relative rounded-b-3xl overflow-hidden shadow-2xl"
-        style={{
-          backgroundImage: "url('/crash-bg.svg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
+    <div className="mt-4">
+      <AnimatedAreaGraph
+        generateData={generateData}
+        triggerAnimation={triggerAnimation}
+        cashOutMultiplier={cashOutMultiplier}
+        onMultiplierChange={(multiplier: number, isFinal: boolean) => {
+          setCurrentMultiplier(multiplier);
+          if (isFinal) {
+            // Game stops automatically
+            setGameState("betting");
+            toast("The game has stopped!", {
+              style: {
+                background: "red",
+                color: "#fff",
+                borderColor: "red",
+              },
+            });
+          }
         }}
-      >
-        <div className="absolute inset-0 bg-black/50"></div>
-        <div className="relative z-10 flex flex-col items-center pt-10">
-          {/* Multiplier Display */}
-          <div className="text-6xl font-bold mb-6 text-white">
-            {isCrashed ? (
-              <span className="text-red-500">Crashed!</span>
-            ) : (
-              `${multiplier.toFixed(2)}x`
-            )}
-          </div>
-
-          {/* Rocket Animation */}
-          <div className="relative w-full h-64">
-            {isRunning && !isCrashed && !cashOutMultiplier && (
-              <motion.div
-                initial={{ x: 0, y: 150 }}
-                animate={{
-                  x: isRunning ? [0, 300, 600, 900] : 0,
-                  y: isRunning ? [150, 0, -100, -200] : 150,
-                }}
-                transition={{
-                  duration: 10,
-                  ease: "linear",
-                  repeat: isRunning ? Infinity : 0,
-                }}
-                className="absolute text-7xl transform -rotate-45"
-              >
-                🚀
-              </motion.div>
-            )}
-          </div>
+      />
+      <BettForm
+        onClick={gameState === "playing" ? handleCashOut : startGame}
+        bet={bet}
+        setBet={setBet}
+        isManual={isManual}
+        buttonTitle={gameState === "playing" ? "Cash Out" : "Start"}
+        setIsManual={setIsManual}
+      />
+      {cashOutMultiplier && (
+        <div className="text-center mt-4">
+          <span className="text-green-500 font-bold">
+            You cashed out at {cashOutMultiplier.toFixed(2)}x and won{" "}
+            {(bet * cashOutMultiplier).toFixed(2)}!
+          </span>
         </div>
-      </div>
-
-      {/* Control Area with Gradient */}
-      <div className="w-full flex-1  ">
-        <div className="max-w-3xl mx-auto p-8">
-          {/* Buttons */}
-          <div className="flex justify-center gap-4">
-            {!betPlaced ? (
-              <BettingButton onClick={handleBet} />
-            ) : (
-              <button
-                onClick={handleCashOut}
-                className="bg-white text-orange-600 px-8 py-3 rounded-xl font-bold text-xl hover:bg-gray-100 transition shadow-lg border-2 border-orange-300"
-              >
-                Cash Out
-              </button>
-            )}
-          </div>
-
-          {/* Game Summary */}
-          {cashOutMultiplier && (
-            <div className="mt-6 text-2xl text-center text-white font-semibold">
-              You cashed out at:{" "}
-              <span className="font-bold text-white">{cashOutMultiplier}x</span>
-            </div>
-          )}
-        </div>
-      </div>
-      <BettForm />
+      )}
     </div>
   );
 };
 
-export default CrashGame;
+export default Crash;

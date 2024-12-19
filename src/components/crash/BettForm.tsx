@@ -1,32 +1,53 @@
 "use client";
 
-import { useState } from "react";
-import BettingButton from "../common/BettButton";
+import { debounce } from "@/utils/deboucne";
+import MultiplierButton from "../common/MultiplierButton";
 
-const BettForm = () => {
-  const [isManual, setIsManual] = useState(false);
+type BetFormProps = {
+  onClick?: () => void;
+  bet: number;
+  setBet: (bet: number) => void;
+  isManual: boolean;
+  setIsManual: (isManual: boolean) => void;
+  buttonTitle?: string;
+};
 
+const BettForm: React.FC<BetFormProps> = ({
+  onClick,
+  bet,
+  setBet,
+  isManual,
+  setIsManual,
+  buttonTitle,
+}) => {
+  const debouncedSetBet = debounce((value: number) => {
+    setBet(value);
+  }, 100);
   return (
-    <div className=" w-[90%] mx-auto mt-5 rounded-xl font-sans bg-[#242422] px-2 py-3">
+    <div className=" w-[90%] mx-auto  rounded-xl font-sans bg-[#242422] px-2 py-3">
       <div className="flex items-center justify-between text-[14px] font-medium text-white">
         <h3>Bet Amount</h3>
         <p>$50.32</p>
       </div>
       <div className=" flex mt-2 items-center gap-2 justify-between">
         <div className="flex-1 w-[20%] rounded-xl flex h-[55px] bg-[#100F11] border-2 border-[#2E2E2D]">
-          <input className="flex w-[80%] rounded-xl bg-[#100F11] focus:outline-none px-3" />
+          <input
+            type="number"
+            value={bet}
+            min="1"
+            onChange={(e) => debouncedSetBet(e.target.value)}
+            className="flex w-[80%] rounded-xl bg-[#100F11] focus:outline-none px-3"
+          />
           <div className="flex items-center justify-center w-[20%] h-full">
             <img className="h-6 w-6" src="/logo.svg" alt="Paw" />
           </div>
         </div>
-        <div className="grid place-items-center h-[55px] w-[55px] rounded-xl bg-[#100F11] border-2 border-[#2E2E2D]">
-          <p>3x</p>
-        </div>
-        <div className="grid place-items-center h-[55px] w-[55px] rounded-xl bg-[#100F11] border-2 border-[#2E2E2D]">
-          <p>2x</p>
-        </div>
+        <MultiplierButton onClick={() => setBet(bet / 2)} label="1/2x" />
+        <MultiplierButton onClick={() => setBet(bet * 2)} label="2x" />
       </div>
-      <BettingButton />
+      <button className={`btn-shadow  `} onClick={onClick} disabled={bet <= 0}>
+        {buttonTitle || "BET"}
+      </button>
 
       <div className="mt-4">
         <p>Bet Amount</p>

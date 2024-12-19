@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { create } from "zustand";
 import { StateCreator } from "zustand";
 
@@ -37,7 +39,7 @@ const calculateWinChanceAndMultiplier = (rollOver: number) => {
 };
 
 export const createDiceStore: StateCreator<DiceState & DiceActions> = (
-  set,
+  set
 ) => ({
   rollResult: null,
   multiplier: 1.012,

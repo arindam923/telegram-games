@@ -4,13 +4,11 @@ import { useGameStore } from "@/store/MineStore";
 
 type BetFormProps = {
   onClick: () => void;
-  className?: string;
   buttonTitle?: string;
 };
 
 const BetForm: React.FC<BetFormProps> = ({
   onClick,
-  className = "w-full mt-4 py-3 rounded-xl bg-green-500 text-white",
   buttonTitle = "Start Game",
 }) => {
   const { bet, setBet, numOfMines, setNumOfMines, balance, gameState } =
